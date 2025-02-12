@@ -188,7 +188,7 @@ def main():
     # Font
     font = pygame.font.Font('PixelMillennium-1oBZ.ttf', 30)
 
-    # Game over sprites
+    # Game over sprites # 
     # Create game over
     game_over = pygame.sprite.Sprite()
     game_over.image = TextureManager.texture_surface.subsurface(395, 59, 96, 21)
@@ -202,7 +202,7 @@ def main():
     game_over_sprites = pygame.sprite.Group()
     game_over_sprites.add(game_over, ok_button)
 
-    # Start screen sprites
+    # Start screen sprites #
     # Create title
     title = pygame.sprite.Sprite()
     title.image = TextureManager.texture_surface.subsurface(351, 91, 89, 24)
@@ -215,6 +215,18 @@ def main():
 
     start_sprites = pygame.sprite.Group()
     start_sprites.add(title, run_button)
+
+    # Instruction screen sprites #
+    ready = pygame.sprite.Sprite()
+    ready.image = TextureManager.texture_surface.subsurface(295, 59, 92, 25)
+    ready.rect = ready.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 4))
+
+    tap = pygame.sprite.Sprite()
+    tap.image = TextureManager.texture_surface.subsurface(292, 91, 57, 49)
+    tap.rect = tap.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 2))
+
+    instruction_sprites = pygame.sprite.Group()
+    instruction_sprites.add(ready, tap)
 
     # Create background
     background_surface = TextureManager.texture_surface.subsurface(0, 0, *SCREEN_DIMS)
@@ -249,8 +261,13 @@ def main():
             if game_state == 0:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     game_state = 1
-
+            
             elif game_state == 1:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    game_state = 2
+                    bird.sprite.jump()
+
+            elif game_state == 2:
                 # Pipes generator
                 if event.type == pipes_timer:
                     new_pipes = generate_pipes()
@@ -260,7 +277,7 @@ def main():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     bird.sprite.jump()
             
-            elif game_state == 2:
+            elif game_state == 3:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     game_state = 0 
                     bird.sprite.reset()
@@ -275,9 +292,19 @@ def main():
             floor_tiles.update()
             if len(floor_tiles) < 2:
                 floor_tiles.add(Floor(SCREEN_DIMS[0]))
+        
+        # Instructions state
+        elif game_state == 1:
+            screen.blit(background_surface, background_surface.get_rect())
+            bird.draw(screen)
+            instruction_sprites.draw(screen)
+            floor_tiles.draw(screen)
+            floor_tiles.update()
+            if len(floor_tiles) < 2:
+                floor_tiles.add(Floor(SCREEN_DIMS[0]))
 
         # Game running state
-        elif game_state == 1:
+        elif game_state == 2:
             # Print the background
             screen.blit(background_surface, background_surface.get_rect())
 
@@ -308,14 +335,14 @@ def main():
         
             # Check collision with the floor
             if bird.sprite.rect.bottom >= FLOOR_ORIGIN_Y:
-                game_state = 2
+                game_state = 3
 
             # Check collisiion between bird and pipes
             if check_group_collision(bird, pipes, False):
-                game_state = 2
+                game_state = 3
 
         # Game over state
-        elif game_state == 2:
+        elif game_state == 3:
             screen.blit(background_surface, background_surface.get_rect())
             bird.draw(screen)
             bird.update()
