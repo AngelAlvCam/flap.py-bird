@@ -297,6 +297,7 @@ def main():
         elif game_state == 1:
             screen.blit(background_surface, background_surface.get_rect())
             bird.draw(screen)
+            bird.sprite.animate()
             instruction_sprites.draw(screen)
             floor_tiles.draw(screen)
             floor_tiles.update()
@@ -305,6 +306,10 @@ def main():
 
         # Game running state
         elif game_state == 2:
+            # Draw and update the points
+            points.draw(screen)
+            points.update()
+
             # Print the background
             screen.blit(background_surface, background_surface.get_rect())
 
@@ -316,10 +321,6 @@ def main():
             pipes.draw(screen)
             pipes.update()
     
-            # Draw and update the points
-            points.draw(screen)
-            points.update()
-
             # Check collision with points to see if its possible to score a point
             if check_group_collision(bird, points, True):
                 score += 1
