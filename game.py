@@ -1,6 +1,7 @@
 import pygame
 from random import randint
 from sys import exit
+from typing import Tuple
 
 # Constants
 SCREEN_DIMS = (144, 256)
@@ -95,7 +96,6 @@ class Pipe(TextureManager, pygame.sprite.Sprite):
     
     def destroy(self):
         if self.rect.right < 0: # Check if it is possible to destroy the pipe
-            print("kill pipe")
             self.kill()
 
 class Floor(TextureManager, pygame.sprite.Sprite):
@@ -113,7 +113,6 @@ class Floor(TextureManager, pygame.sprite.Sprite):
 
     def destroy(self):
         if self.rect.right < 0:
-            print("kill floor")
             self.kill()
 
 class Point(pygame.sprite.Sprite):
@@ -131,7 +130,7 @@ class Point(pygame.sprite.Sprite):
     def update(self):
         self.animate()
 
-def generate_pipes():
+def generate_pipes() -> tuple[Pipe, Pipe]:
     # Generate pipe at the bottom
     height = randint(MIN_PIPE_HEIGHT, MAX_PIPE_HEIGHT)
     pipe_border = SCREEN_DIMS[1] - FLOOR_HEIGHT - height
@@ -152,12 +151,23 @@ def check_group_collision(single: pygame.sprite.GroupSingle, group: pygame.sprit
         return True
     return False
 
+def render_score(screen: pygame.Surface, font: pygame.font.Font, score: int, position: str):
+    '''
+    screen is a surface in which the score will be printed, font is the font that will be used
+    and int is the score integer number.
+    position is a string in ("top", "bottom", "mid") 
+    '''
 
-def render_score(screen, font, score):
+    position_dict = {
+        "top": (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 6),
+        "mid": (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 2),
+        "bottom": (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] - (SCREEN_DIMS[1] // 4))
+    }
+
     # Enable bold and print the background of the font
     font.set_bold(True)
     score_surface = font.render(f"{score}", False, 'Black')
-    score_rect = score_surface.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 8))
+    score_rect = score_surface.get_rect(center = (position_dict[position]))
     screen.blit(score_surface, score_rect)
     
     # Disable font (regular) and print the front of the font
@@ -178,13 +188,33 @@ def main():
     # Font
     font = pygame.font.Font('PixelMillennium-1oBZ.ttf', 30)
 
-    # Create game over and title sprites
-    game_over_surface = TextureManager.texture_surface.subsurface(395, 59, 96, 21)
-    game_over_rect = game_over_surface.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 4))
+    # Game over sprites
+    # Create game over
+    game_over = pygame.sprite.Sprite()
+    game_over.image = TextureManager.texture_surface.subsurface(395, 59, 96, 21)
+    game_over.rect = game_over.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 4))
 
     # Ok button
-    ok_button_surface = TextureManager.texture_surface.subsurface(462, 42, 40, 14)
-    ok_button_rect = ok_button_surface.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] - (SCREEN_DIMS[1] // 3)))
+    ok_button = pygame.sprite.Sprite()
+    ok_button.image = TextureManager.texture_surface.subsurface(462, 42, 40, 14)
+    ok_button.rect = ok_button.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] - (SCREEN_DIMS[1] // 3)))
+    
+    game_over_sprites = pygame.sprite.Group()
+    game_over_sprites.add(game_over, ok_button)
+
+    # Start screen sprites
+    # Create title
+    title = pygame.sprite.Sprite()
+    title.image = TextureManager.texture_surface.subsurface(351, 91, 89, 24)
+    title.rect = title.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 4))
+
+    # Create run button
+    run_button = pygame.sprite.Sprite()
+    run_button.image = TextureManager.texture_surface.subsurface(354, 118, 52, 29)
+    run_button.rect = run_button.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 2))
+
+    start_sprites = pygame.sprite.Group()
+    start_sprites.add(title, run_button)
 
     # Create background
     background_surface = TextureManager.texture_surface.subsurface(0, 0, *SCREEN_DIMS)
@@ -208,7 +238,7 @@ def main():
     pipes_timer = pygame.USEREVENT + 1
     pygame.time.set_timer(pipes_timer, 1500) # 2 seconds
 
-    game_active = True
+    game_state = 0
     while True:
         # Events catcher -->
         for event in pygame.event.get():
@@ -216,7 +246,11 @@ def main():
                 pygame.quit()
                 exit()
             
-            if game_active:
+            if game_state == 0:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    game_state = 1
+
+            elif game_state == 1:
                 # Pipes generator
                 if event.type == pipes_timer:
                     new_pipes = generate_pipes()
@@ -226,21 +260,24 @@ def main():
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     bird.sprite.jump()
             
-            else:
+            elif game_state == 2:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    game_active = True
+                    game_state = 0 
                     bird.sprite.reset()
                     score = 0 # Restart score
-
-                    # Restart points
-                    points.empty()
-
-                    # Restart pipes
-                    pipes.empty()
-
+                    points.empty() # Delete all the remaining points
+                    pipes.empty() # Delete all the remaining pipes
             
-        # Game and screen flow -->
-        if game_active:
+        if game_state == 0:
+            screen.blit(background_surface, background_surface.get_rect())
+            start_sprites.draw(screen)
+            floor_tiles.draw(screen)
+            floor_tiles.update()
+            if len(floor_tiles) < 2:
+                floor_tiles.add(Floor(SCREEN_DIMS[0]))
+
+        # Game running state
+        elif game_state == 1:
             # Print the background
             screen.blit(background_surface, background_surface.get_rect())
 
@@ -255,11 +292,13 @@ def main():
             # Draw and update the points
             points.draw(screen)
             points.update()
+
+            # Check collision with points to see if its possible to score a point
             if check_group_collision(bird, points, True):
                 score += 1
 
             # Render score
-            render_score(screen, font, score)
+            render_score(screen, font, score, "top")
 
             # Print the floor (it goes over the pipes)
             floor_tiles.draw(screen)
@@ -269,24 +308,22 @@ def main():
         
             # Check collision with the floor
             if bird.sprite.rect.bottom >= FLOOR_ORIGIN_Y:
-                game_active = False
+                game_state = 2
 
             # Check collisiion between bird and pipes
             if check_group_collision(bird, pipes, False):
-                game_active = False
-        else:
+                game_state = 2
+
+        # Game over state
+        elif game_state == 2:
             screen.blit(background_surface, background_surface.get_rect())
             bird.draw(screen)
             bird.update()
             pipes.draw(screen)
             floor_tiles.draw(screen)
+            game_over_sprites.draw(screen)
+            render_score(screen, font, score, "mid")
 
-            # Game over
-            screen.blit(game_over_surface, game_over_rect)
-
-            # Ok button
-            screen.blit(ok_button_surface, ok_button_rect)
-    
         pygame.display.update()
         clock.tick(60)
 
