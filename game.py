@@ -11,7 +11,6 @@ MIN_PIPE_HEIGHT = 30
 MAX_PIPE_HEIGHT = SCREEN_DIMS[1] - FLOOR_HEIGHT - PIPE_GAP - MIN_PIPE_HEIGHT
 BOARD_SPEED = 1 
 
-
 class TextureManager:
     texture_surface = None
 
@@ -39,6 +38,7 @@ class Bird(TextureManager, pygame.sprite.Sprite):
     
     # Method to update the current texture of the bird
     def animate(self):
+
         self.texture_index += self.texture_multiplier / 5 
         if self.texture_index < 0 or self.texture_index >= 3:
             self.texture_multiplier *= -1
@@ -65,6 +65,14 @@ class Bird(TextureManager, pygame.sprite.Sprite):
         # self.input()
         self.apply_gravity()
         self.animate()
+    
+    def reset(self):
+        '''
+        Reset parameters of the current instance of bird to start a new game 
+        '''
+        self.texture_index = 0
+        self.gravity = 0
+        self.rect.center = Bird.DEFAULT_ORIGIN
 
 class Pipe(TextureManager, pygame.sprite.Sprite):
     def __init__(self, type: str, pipe_board_in_y: int):
@@ -157,6 +165,7 @@ def render_score(screen, font, score):
     score_surface = font.render(f"{score}", False, 'White')
     screen.blit(score_surface, score_rect)
 
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_DIMS, pygame.RESIZABLE | pygame.SCALED)
@@ -220,8 +229,7 @@ def main():
             else:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                     game_active = True
-                    bird.sprite.rect = bird.sprite.image.get_rect(center = bird.sprite.DEFAULT_ORIGIN) # Restart bird's position
-                    bird.sprite.gravity = 0 # Restart gravity
+                    bird.sprite.reset()
                     score = 0 # Restart score
 
                     # Restart points
