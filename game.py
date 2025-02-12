@@ -182,6 +182,15 @@ def main():
     pygame.display.set_caption('Flappy Bird')
     clock = pygame.time.Clock()
 
+    # Load sounds
+    sounds = {
+        'point': pygame.mixer.Sound('sounds/sfx_point.wav'),
+        'hit': pygame.mixer.Sound('sounds/sfx_hit.wav'),
+        'die': pygame.mixer.Sound('sounds/sfx_die.wav'),
+        'wing': pygame.mixer.Sound('sounds/sfx_wing.wav'),
+        'tap': pygame.mixer.Sound('sounds/sfx_swooshing.wav')
+    }
+
     # Enable texture manager
     TextureManager.load_texture('textures.png')
 
@@ -264,6 +273,7 @@ def main():
             if game_state == 0:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if run_button.sprite.rect.collidepoint(pygame.mouse.get_pos()):
+                        sounds['tap'].play()
                         game_state = 1
 
                 # if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
@@ -273,6 +283,7 @@ def main():
             elif game_state == 1:
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE or event.type == pygame.MOUSEBUTTONDOWN: 
                     game_state = 2
+                    sounds['wing'].play()
                     bird.sprite.jump()
 
             # Game screen
@@ -284,12 +295,14 @@ def main():
                     points.add(Point(*new_pipes)) # Generate points for the new pair of pipes
             
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE or event.type == pygame.MOUSEBUTTONDOWN:
+                    sounds['wing'].play()
                     bird.sprite.jump()
             
             # Game over screen
             elif game_state == 3:
                 if event.type == pygame.MOUSEBUTTONDOWN:
                     if ok_button.sprite.rect.collidepoint(pygame.mouse.get_pos()):
+                        sounds['tap'].play()
                         game_state = 0 
                         bird.sprite.reset()
                         score = 0 # Restart score
@@ -336,6 +349,7 @@ def main():
     
             # Check collision with points to see if its possible to score a point
             if check_group_collision(bird, points, True):
+                sounds['point'].play()
                 score += 1
 
             # Render score
@@ -349,10 +363,13 @@ def main():
         
             # Check collision with the floor
             if bird.sprite.rect.bottom >= FLOOR_ORIGIN_Y:
+                sounds['hit'].play()
                 game_state = 3
 
             # Check collisiion between bird and pipes
             if check_group_collision(bird, pipes, False):
+                sounds['hit'].play()
+                sounds['die'].play()
                 game_state = 3
 
         # Game over state
