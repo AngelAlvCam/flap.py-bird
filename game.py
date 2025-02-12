@@ -133,22 +133,17 @@ def generate_pipes():
     top_pipe = Pipe('top', pipe_border - PIPE_GAP)
     return (bottom_pipe, top_pipe)
 
-def check_pipes_collision(bird_group, pipes_group):
+def check_group_collision(single: pygame.sprite.GroupSingle, group: pygame.sprite.Group, kill: bool) -> bool:
     '''
-    Returns True if there is a collision between bird group of sprites (a single group)
-    and pipes group.
-    Otherwise, it returns False
+    Function that checks if a member of a single group collided with any of the members of a group.
+    If kill is True, the collided member of group will be deleted, otherwise, the members won't be
+    deleted by the execution of this function.
+    Returns True if a collision happened between single and a member of group.
     '''
-    if pygame.sprite.spritecollide(bird_group.sprite, pipes_group, False):
-        pipes_group.empty()
-        return True
-    else:
-        return False
-
-def check_points_collision(bird_group, points_group):
-    if pygame.sprite.spritecollide(bird_group.sprite, points_group, True): # Calls kill()
+    if pygame.sprite.spritecollide(single.sprite, group, kill):
         return True
     return False
+
 
 def render_score(screen, font, score):
     # Enable bold and print the background of the font
@@ -232,6 +227,9 @@ def main():
                     # Restart points
                     points.empty()
 
+                    # Restart pipes
+                    pipes.empty()
+
             
         # Game and screen flow -->
         if game_active:
@@ -249,7 +247,7 @@ def main():
             # Draw and update the points
             points.draw(screen)
             points.update()
-            if check_points_collision(bird, points):
+            if check_group_collision(bird, points, True):
                 score += 1
 
             # Render score
@@ -266,7 +264,7 @@ def main():
                 game_active = False
 
             # Check collisiion between bird and pipes
-            if check_pipes_collision(bird, pipes):
+            if check_group_collision(bird, pipes, False):
                 game_active = False
         else:
             screen.blit(background_surface, background_surface.get_rect())
