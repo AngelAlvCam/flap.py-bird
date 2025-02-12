@@ -20,6 +20,8 @@ class TextureManager:
         cls.texture_surface = pygame.image.load(texture_path).convert_alpha()
 
 class Bird(TextureManager, pygame.sprite.Sprite):
+    DEFAULT_ORIGIN = (SCREEN_DIMS[0] // 4,  SCREEN_DIMS[1] // 2)
+
     def __init__(self):
         pygame.sprite.Sprite.__init__(self)
         self.textures = [
@@ -30,7 +32,7 @@ class Bird(TextureManager, pygame.sprite.Sprite):
         self.texture_index = 0
         self.texture_multiplier = 1
         self.image = self.textures[self.texture_index]
-        self.rect = self.image.get_rect(center = (SCREEN_DIMS[0] / 4, SCREEN_DIMS[1] / 2))
+        self.rect = self.image.get_rect(center = Bird.DEFAULT_ORIGIN)
         
         # Animation parameters
         self.gravity = 0
@@ -51,13 +53,13 @@ class Bird(TextureManager, pygame.sprite.Sprite):
             self.jump()
     
     def jump(self):
-        self.rect.y -= 30 # Elevate bird
-        self.gravity = 0 # Restart gravity
+        self.gravity = -2 # Restart gravity
     
     def apply_gravity(self):
         # Apply effect of gravity in the Y axis
-        self.gravity += 0.08
-        self.rect.y += self.gravity
+        self.gravity += 0.1
+        if self.rect.bottom < FLOOR_ORIGIN_Y:
+            self.rect.y += self.gravity
 
     def update(self):
         # self.input()
@@ -172,6 +174,14 @@ def main():
     # Font
     font = pygame.font.Font('PixelMillennium-1oBZ.ttf', 30)
 
+    # Create game over and title sprites
+    game_over_surface = TextureManager.texture_surface.subsurface(395, 59, 96, 21)
+    game_over_rect = game_over_surface.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 4))
+
+    # Ok button
+    ok_button_surface = TextureManager.texture_surface.subsurface(462, 42, 40, 14)
+    ok_button_rect = ok_button_surface.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] - (SCREEN_DIMS[1] // 3)))
+
     # Create background
     background_surface = TextureManager.texture_surface.subsurface(0, 0, *SCREEN_DIMS)
 
@@ -195,54 +205,81 @@ def main():
     pygame.time.set_timer(pipes_timer, 1500) # 2 seconds
 
     game_active = True
-    while game_active:
+    while True:
+        # Events catcher -->
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 exit()
             
-            # Pipes generator
-            if event.type == pipes_timer:
-                new_pipes = generate_pipes()
-                pipes.add(new_pipes)
-                points.add(Point(*new_pipes)) # Generate points for the new pair of pipes
+            if game_active:
+                # Pipes generator
+                if event.type == pipes_timer:
+                    new_pipes = generate_pipes()
+                    pipes.add(new_pipes)
+                    points.add(Point(*new_pipes)) # Generate points for the new pair of pipes
             
-            if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                bird.sprite.jump()
-                
-        # Print the background
-        screen.blit(background_surface, background_surface.get_rect())
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    bird.sprite.jump()
+            
+            else:
+                if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
+                    game_active = True
+                    bird.sprite.rect = bird.sprite.image.get_rect(center = bird.sprite.DEFAULT_ORIGIN) # Restart bird's position
+                    bird.sprite.gravity = 0 # Restart gravity
+                    score = 0 # Restart score
 
-        # Print the bird
-        bird.draw(screen)
-        bird.update()
+                    # Restart points
+                    points.empty()
 
-        # Draw and update pipes
-        pipes.draw(screen)
-        pipes.update()
+            
+        # Game and screen flow -->
+        if game_active:
+            # Print the background
+            screen.blit(background_surface, background_surface.get_rect())
+
+            # Print the bird
+            bird.draw(screen)
+            bird.update()
+
+            # Draw and update pipes
+            pipes.draw(screen)
+            pipes.update()
     
-        # Draw and update the points
-        points.draw(screen)
-        points.update()
-        if check_points_collision(bird, points):
-            score += 1
+            # Draw and update the points
+            points.draw(screen)
+            points.update()
+            if check_points_collision(bird, points):
+                score += 1
 
-        # Render score
-        render_score(screen, font, score)
+            # Render score
+            render_score(screen, font, score)
 
-        # Print the floor (it goes over the pipes)
-        floor_tiles.draw(screen)
-        floor_tiles.update()
-        if len(floor_tiles) < 2:
-            floor_tiles.add(Floor(SCREEN_DIMS[0]))
+            # Print the floor (it goes over the pipes)
+            floor_tiles.draw(screen)
+            floor_tiles.update()
+            if len(floor_tiles) < 2:
+                floor_tiles.add(Floor(SCREEN_DIMS[0]))
         
-        # Check collision with the floor
-        if bird.sprite.rect.bottom >= FLOOR_ORIGIN_Y:
-            game_active = False
+            # Check collision with the floor
+            if bird.sprite.rect.bottom >= FLOOR_ORIGIN_Y:
+                game_active = False
 
-        # Check collisiion between bird and pipes
-        if check_pipes_collision(bird, pipes):
-            game_active = False
+            # Check collisiion between bird and pipes
+            if check_pipes_collision(bird, pipes):
+                game_active = False
+        else:
+            screen.blit(background_surface, background_surface.get_rect())
+            bird.draw(screen)
+            bird.update()
+            pipes.draw(screen)
+            floor_tiles.draw(screen)
+
+            # Game over
+            screen.blit(game_over_surface, game_over_rect)
+
+            # Ok button
+            screen.blit(ok_button_surface, ok_button_rect)
     
         pygame.display.update()
         clock.tick(60)
