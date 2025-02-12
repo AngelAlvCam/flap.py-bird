@@ -1,0 +1,5 @@
+# Local python virtual environment
+venv/
+
+# Local tests
+*_test.py
