@@ -51,12 +51,12 @@ class Bird(TextureManager, pygame.sprite.Sprite):
             self.jump()
     
     def jump(self):
-        self.rect.y -= PIPE_GAP // 2 # Elevate bird
+        self.rect.y -= 30 # Elevate bird
         self.gravity = 0 # Restart gravity
     
     def apply_gravity(self):
         # Apply effect of gravity in the Y axis
-        self.gravity += 0.1
+        self.gravity += 0.08
         self.rect.y += self.gravity
 
     def update(self):
@@ -148,6 +148,18 @@ def check_points_collision(bird_group, points_group):
         return True
     return False
 
+def render_score(screen, font, score):
+    # Enable bold and print the background of the font
+    font.set_bold(True)
+    score_surface = font.render(f"{score}", False, 'Black')
+    score_rect = score_surface.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 8))
+    screen.blit(score_surface, score_rect)
+    
+    # Disable font (regular) and print the front of the font
+    font.set_bold(False)
+    score_surface = font.render(f"{score}", False, 'White')
+    screen.blit(score_surface, score_rect)
+
 def main():
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_DIMS, pygame.RESIZABLE | pygame.SCALED)
@@ -156,6 +168,9 @@ def main():
 
     # Enable texture manager
     TextureManager.load_texture('textures.png')
+
+    # Font
+    font = pygame.font.Font('PixelMillennium-1oBZ.ttf', 30)
 
     # Create background
     background_surface = TextureManager.texture_surface.subsurface(0, 0, *SCREEN_DIMS)
@@ -211,7 +226,9 @@ def main():
         points.update()
         if check_points_collision(bird, points):
             score += 1
-        print(f"score = {score}")
+
+        # Render score
+        render_score(screen, font, score)
 
         # Print the floor (it goes over the pipes)
         floor_tiles.draw(screen)
