@@ -38,13 +38,13 @@ class Bird(TextureManager, pygame.sprite.Sprite):
     
     # Method to update the current texture of the bird
     def animate(self):
+        if self.rect.bottom < FLOOR_ORIGIN_Y:
+            self.texture_index += self.texture_multiplier / 5 
+            if self.texture_index < 0 or self.texture_index >= 3:
+                self.texture_multiplier *= -1
+                self.texture_index += self.texture_multiplier
 
-        self.texture_index += self.texture_multiplier / 5 
-        if self.texture_index < 0 or self.texture_index >= 3:
-            self.texture_multiplier *= -1
-            self.texture_index += self.texture_multiplier
-
-        self.image = self.textures[int(self.texture_index)] 
+            self.image = self.textures[int(self.texture_index)] 
     
     def input(self):
         keys = pygame.key.get_pressed()
