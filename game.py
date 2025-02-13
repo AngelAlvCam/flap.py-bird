@@ -47,12 +47,6 @@ class Bird(TextureManager, pygame.sprite.Sprite):
 
             self.image = self.textures[int(self.texture_index)] 
     
-    def input(self):
-        keys = pygame.key.get_pressed()
-        # Jump!
-        if keys[pygame.K_SPACE]:
-            self.jump()
-    
     def jump(self):
         self.gravity = -2 # Restart gravity
     
@@ -63,7 +57,6 @@ class Bird(TextureManager, pygame.sprite.Sprite):
             self.rect.y += self.gravity
 
     def update(self):
-        # self.input()
         self.apply_gravity()
         self.animate()
     
@@ -130,6 +123,7 @@ class Point(pygame.sprite.Sprite):
     def update(self):
         self.animate()
 
+# Additional functions
 def generate_pipes() -> tuple[Pipe, Pipe]:
     # Generate pipe at the bottom
     height = randint(MIN_PIPE_HEIGHT, MAX_PIPE_HEIGHT)
@@ -275,9 +269,6 @@ def main():
                     if run_button.sprite.rect.collidepoint(pygame.mouse.get_pos()):
                         sounds['tap'].play()
                         game_state = 1
-
-                # if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
-                    # game_state = 1
             
             # Instructions screen
             elif game_state == 1:
@@ -294,6 +285,7 @@ def main():
                     pipes.add(new_pipes)
                     points.add(Point(*new_pipes)) # Generate points for the new pair of pipes
             
+                # Jump!
                 if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE or event.type == pygame.MOUSEBUTTONDOWN:
                     sounds['wing'].play()
                     bird.sprite.jump()
@@ -339,14 +331,14 @@ def main():
             # Print the background
             screen.blit(background_surface, background_surface.get_rect())
 
-            # Print the bird
-            bird.draw(screen)
-            bird.update()
-
             # Draw and update pipes
             pipes.draw(screen)
             pipes.update()
     
+            # Print the bird
+            bird.draw(screen)
+            bird.update()
+
             # Check collision with points to see if its possible to score a point
             if check_group_collision(bird, points, True):
                 sounds['point'].play()
@@ -375,10 +367,10 @@ def main():
         # Game over state
         elif game_state == 3:
             screen.blit(background_surface, background_surface.get_rect())
-            bird.draw(screen)
-            bird.update()
             pipes.draw(screen)
             floor_tiles.draw(screen)
+            bird.draw(screen)
+            bird.update()
             game_over_sprites.draw(screen)
             ok_button.draw(screen)
             render_score(screen, font, score, "mid")
