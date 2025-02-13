@@ -1,5 +1,8 @@
-# Local python virtual environment
+# Local python virtual environment and cache
+__pycache__/
+.pytest_cache
 venv/
 
 # Local tests
 *_test.py
+test_*

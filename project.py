@@ -21,13 +21,30 @@ class TextureManager:
 
 class Bird(TextureManager, pygame.sprite.Sprite):
     DEFAULT_ORIGIN = (SCREEN_DIMS[0] // 4,  SCREEN_DIMS[1] // 2)
+    COLORS = {
+        "yellow": ( 
+            (3, 491, 17, 12),
+            (31, 491, 17, 12),
+            (59, 491, 17, 12)
+        ),
+        "blue": (
+            (87, 491, 17, 12),
+            (115, 329, 17, 12),
+            (115, 355, 17, 12)
+        ),
+        "red": (
+            (115, 381, 17, 12),
+            (115, 407, 17, 12),
+            (115, 433, 17, 12)
+        )
+    }
 
-    def __init__(self):
+    def __init__(self, color='yellow'):
         pygame.sprite.Sprite.__init__(self)
         self.textures = [
-            TextureManager.texture_surface.subsurface(3, 491, 17, 12),
-            TextureManager.texture_surface.subsurface(31, 491, 17, 12),
-            TextureManager.texture_surface.subsurface(59, 491, 17, 12)
+            TextureManager.texture_surface.subsurface(Bird.COLORS[color][0]),
+            TextureManager.texture_surface.subsurface(Bird.COLORS[color][1]),
+            TextureManager.texture_surface.subsurface(Bird.COLORS[color][2])
         ]
         self.texture_index = 0
         self.texture_multiplier = 1
@@ -236,7 +253,7 @@ def main():
 
     # Create bird group
     bird = pygame.sprite.GroupSingle()
-    bird.add(Bird())
+    bird.add(Bird('red'))
     score = 0
 
     # Create pipes group
