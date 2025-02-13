@@ -222,7 +222,7 @@ def main():
 
     # Start screen sprites
     title = pygame.sprite.Sprite()
-    title.image = TextureManager.texture_surface.subsurface(351, 91, 89, 24)
+    title.image = TextureManager.texture_surface.subsurface(359, 91, 94, 24)
     title.rect = title.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 4))
     run_button = pygame.sprite.Sprite()
     run_button.image = TextureManager.texture_surface.subsurface(354, 118, 52, 29)
