@@ -189,7 +189,7 @@ def main():
     TextureManager.load_texture('textures.png')
 
     # Font
-    font = pygame.font.Font('PixelMillennium-1oBZ.ttf', 30)
+    font = pygame.font.Font('font/PixelMillennium-1oBZ.ttf', 30)
 
     # Game over sprites 
     game_over = pygame.sprite.Sprite()

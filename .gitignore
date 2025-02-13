@@ -3,6 +3,3 @@ venv/
 
 # Local tests
 *_test.py
-
-# Fonts
-*.ttf
