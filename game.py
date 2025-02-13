@@ -191,45 +191,39 @@ def main():
     # Font
     font = pygame.font.Font('PixelMillennium-1oBZ.ttf', 30)
 
-    # Game over sprites # 
-    # Create game over
+    # Game over sprites 
     game_over = pygame.sprite.Sprite()
     game_over.image = TextureManager.texture_surface.subsurface(395, 59, 96, 21)
     game_over.rect = game_over.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 4))
+    ok_button = pygame.sprite.Sprite()
+    ok_button.image = TextureManager.texture_surface.subsurface(462, 42, 40, 14)
+    ok_button.rect = ok_button.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] - (SCREEN_DIMS[1] // 3)))
 
-    # Ok button (Clickable)
-    ok_button = pygame.sprite.GroupSingle()
-    ok_button.add(pygame.sprite.Sprite())
-    ok_button.sprite.image = TextureManager.texture_surface.subsurface(462, 42, 40, 14)
-    ok_button.sprite.rect = ok_button.sprite.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] - (SCREEN_DIMS[1] // 3)))
-    
+    # Add game over sprites to a group
     game_over_sprites = pygame.sprite.Group()
-    game_over_sprites.add(game_over)
+    game_over_sprites.add(game_over, ok_button) # Index 1 is a button
 
-    # Start screen sprites #
-    # Create title
+    # Start screen sprites
     title = pygame.sprite.Sprite()
     title.image = TextureManager.texture_surface.subsurface(351, 91, 89, 24)
     title.rect = title.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 4))
+    run_button = pygame.sprite.Sprite()
+    run_button.image = TextureManager.texture_surface.subsurface(354, 118, 52, 29)
+    run_button.rect = run_button.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 2))
 
-    # Create run button (Clickable)
-    run_button = pygame.sprite.GroupSingle()
-    run_button.add(pygame.sprite.Sprite())
-    run_button.sprite.image = TextureManager.texture_surface.subsurface(354, 118, 52, 29)
-    run_button.sprite.rect = run_button.sprite.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 2))
-
+    # Add start screen sprites to a group
     start_sprites = pygame.sprite.Group()
-    start_sprites.add(title)
+    start_sprites.add(title, run_button) # index 1 is a button
 
-    # Instruction screen sprites #
+    # Instruction screen sprites
     ready = pygame.sprite.Sprite()
     ready.image = TextureManager.texture_surface.subsurface(295, 59, 92, 25)
     ready.rect = ready.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 4))
-
     tap = pygame.sprite.Sprite()
     tap.image = TextureManager.texture_surface.subsurface(292, 91, 57, 49)
     tap.rect = tap.image.get_rect(center = (SCREEN_DIMS[0] // 2, SCREEN_DIMS[1] // 2))
 
+    # Add instruction screen sprites to a group
     instruction_sprites = pygame.sprite.Group()
     instruction_sprites.add(ready, tap)
 
@@ -266,7 +260,7 @@ def main():
             # Intro screen
             if game_state == 0:
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if run_button.sprite.rect.collidepoint(pygame.mouse.get_pos()):
+                    if start_sprites.sprites()[1].rect.collidepoint(pygame.mouse.get_pos()):
                         sounds['tap'].play()
                         game_state = 1
             
@@ -293,7 +287,7 @@ def main():
             # Game over screen
             elif game_state == 3:
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    if ok_button.sprite.rect.collidepoint(pygame.mouse.get_pos()):
+                    if game_over_sprites.sprites()[1].rect.collidepoint(pygame.mouse.get_pos()):
                         sounds['tap'].play()
                         game_state = 0 
                         bird.sprite.reset()
@@ -305,7 +299,6 @@ def main():
         if game_state == 0:
             screen.blit(background_surface, background_surface.get_rect())
             start_sprites.draw(screen)
-            run_button.draw(screen)
             floor_tiles.draw(screen)
             floor_tiles.update()
             if len(floor_tiles) < 2:
@@ -372,7 +365,6 @@ def main():
             bird.draw(screen)
             bird.update()
             game_over_sprites.draw(screen)
-            ok_button.draw(screen)
             render_score(screen, font, score, "mid")
 
         pygame.display.update()
