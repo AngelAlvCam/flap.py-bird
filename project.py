@@ -1,6 +1,7 @@
 import pygame
 from random import randint
-from sys import exit
+from sys import exit, argv
+import argparse
 from typing import Tuple
 
 # Constants
@@ -142,6 +143,10 @@ class Point(pygame.sprite.Sprite):
 
 # Additional functions
 def generate_pipes() -> tuple[Pipe, Pipe]:
+    '''
+    Function that generates 2 pipes (bottom and top) with a gap defined
+    by PIPE_GAP
+    '''
     # Generate pipe at the bottom
     height = randint(MIN_PIPE_HEIGHT, MAX_PIPE_HEIGHT)
     pipe_border = SCREEN_DIMS[1] - FLOOR_HEIGHT - height
@@ -187,7 +192,22 @@ def render_score(screen: pygame.Surface, font: pygame.font.Font, score: int, pos
     screen.blit(score_surface, score_rect)
 
 
+def read_arguments(args):
+    '''
+    Receives the command line arguments (including the program's name) and checks if the provided
+    arguments are valid.
+    '''
+    parser = argparse.ArgumentParser(prog=f"python {args[0]}",
+                                    description="A Flappy Bird clone written with Pygame.")
+    parser.add_argument("-c", "--color", help="Bird's color.", choices=[*Bird.COLORS], default="yellow")
+    parsed_args = parser.parse_args(args=args[1:]) # In this stage the args are processed
+    return parsed_args.color
+
 def main():
+    # Check if the command line execution was correct
+    birds_color = read_arguments(argv)
+
+    # Start the game!
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_DIMS, pygame.RESIZABLE | pygame.SCALED)
     pygame.display.set_caption('Flappy Bird')
@@ -253,7 +273,7 @@ def main():
 
     # Create bird group
     bird = pygame.sprite.GroupSingle()
-    bird.add(Bird('red'))
+    bird.add(Bird(birds_color))
     score = 0
 
     # Create pipes group
