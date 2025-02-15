@@ -210,7 +210,7 @@ def main():
     # Start the game!
     pygame.init()
     screen = pygame.display.set_mode(SCREEN_DIMS, pygame.RESIZABLE | pygame.SCALED)
-    pygame.display.set_caption('Flappy Bird')
+    pygame.display.set_caption('Flap.py Bird')
     clock = pygame.time.Clock()
 
     # Load sounds
