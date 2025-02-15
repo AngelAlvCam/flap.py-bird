@@ -2,7 +2,7 @@
 A Flappy Bird clone written in Python with the Pygame library.
 
 ## Demo
-![Gameplay demo](demo.gif)
+![Gameplay demo](assets/demo.gif)
 
 ## Installation
 1. Clone the repository and move to it.

@@ -215,18 +215,18 @@ def main():
 
     # Load sounds
     sounds = {
-        'point': pygame.mixer.Sound('sounds/sfx_point.wav'),
-        'hit': pygame.mixer.Sound('sounds/sfx_hit.wav'),
-        'die': pygame.mixer.Sound('sounds/sfx_die.wav'),
-        'wing': pygame.mixer.Sound('sounds/sfx_wing.wav'),
-        'tap': pygame.mixer.Sound('sounds/sfx_swooshing.wav')
+        'point': pygame.mixer.Sound('assets/sounds/sfx_point.wav'),
+        'hit': pygame.mixer.Sound('assets/sounds/sfx_hit.wav'),
+        'die': pygame.mixer.Sound('assets/sounds/sfx_die.wav'),
+        'wing': pygame.mixer.Sound('assets/sounds/sfx_wing.wav'),
+        'tap': pygame.mixer.Sound('assets/sounds/sfx_swooshing.wav')
     }
 
     # Enable texture manager
-    TextureManager.load_texture('textures.png')
+    TextureManager.load_texture('assets/textures/textures.png')
 
     # Font
-    font = pygame.font.Font('font/PixelMillennium-1oBZ.ttf', 30)
+    font = pygame.font.Font('assets/font/PixelMillennium-1oBZ.ttf', 30)
 
     # Game over sprites 
     game_over = pygame.sprite.Sprite()
