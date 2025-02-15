@@ -192,7 +192,7 @@ def render_score(screen: pygame.Surface, font: pygame.font.Font, score: int, pos
     screen.blit(score_surface, score_rect)
 
 
-def read_arguments(args):
+def read_arguments(*args):
     '''
     Receives the command line arguments (including the program's name) and checks if the provided
     arguments are valid.
@@ -205,7 +205,7 @@ def read_arguments(args):
 
 def main():
     # Check if the command line execution was correct
-    birds_color = read_arguments(argv)
+    birds_color = read_arguments(*argv)
 
     # Start the game!
     pygame.init()
