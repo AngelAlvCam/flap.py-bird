@@ -1,5 +1,5 @@
 import pygame
-from random import randint
+from random import randint, choice
 from sys import exit, argv
 import argparse
 from typing import Tuple
@@ -87,15 +87,25 @@ class Bird(TextureManager, pygame.sprite.Sprite):
         self.rect.center = Bird.DEFAULT_ORIGIN
 
 class Pipe(TextureManager, pygame.sprite.Sprite):
-    def __init__(self, type: str, pipe_board_in_y: int):
+    COLORS = {
+        "green": {
+            "top": (56, 323, 26, 160),
+            "bottom": (84, 323, 26, 160)
+        },
+        "red": {
+            "top": (0, 323, 26, 160),
+            "bottom": (28, 323, 26, 160)
+        }
+    }
+    def __init__(self, type: str, pipe_board_in_y: int, color: str):
         pygame.sprite.Sprite.__init__(self)
 
         match type:
             case 'top':
-                self.image = TextureManager.texture_surface.subsurface(56, 323, 26, 160)
+                self.image = TextureManager.texture_surface.subsurface(Pipe.COLORS[color]['top'])
                 self.rect = self.image.get_rect(midbottom = (SCREEN_DIMS[0] + 10, pipe_board_in_y))
             case 'bottom':
-                self.image = TextureManager.texture_surface.subsurface(84, 323, 26, 160)
+                self.image = TextureManager.texture_surface.subsurface(Pipe.COLORS[color]['bottom'])
                 self.rect = self.image.get_rect(midtop = (SCREEN_DIMS[0] + 10, pipe_board_in_y))
 
     def animate(self):
@@ -147,13 +157,17 @@ def generate_pipes() -> tuple[Pipe, Pipe]:
     Function that generates 2 pipes (bottom and top) with a gap defined
     by PIPE_GAP
     '''
+    
+    # Choose pipe color
+    color = choice([*Pipe.COLORS])
+
     # Generate pipe at the bottom
     height = randint(MIN_PIPE_HEIGHT, MAX_PIPE_HEIGHT)
     pipe_border = SCREEN_DIMS[1] - FLOOR_HEIGHT - height
-    bottom_pipe = Pipe('bottom', pipe_border)
+    bottom_pipe = Pipe('bottom', pipe_border, color)
 
     # Generate top pipe
-    top_pipe = Pipe('top', pipe_border - PIPE_GAP)
+    top_pipe = Pipe('top', pipe_border - PIPE_GAP, color)
     return (bottom_pipe, top_pipe)
 
 def check_group_collision(single: pygame.sprite.GroupSingle, group: pygame.sprite.Group, kill: bool) -> bool:
